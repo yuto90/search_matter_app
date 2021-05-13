@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:universal_html/driver.dart' as driver;
-
-import 'home.dart';
+import 'package:scrape/homepage.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,7 +18,8 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: Text('scraping app'),
         ),
-        body: Home(),
+        //body: Home(),
+        body: HomePage(),
       ),
     );
   }

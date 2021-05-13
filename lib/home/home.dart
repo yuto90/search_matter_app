@@ -38,8 +38,11 @@ class Home extends StatelessWidget {
                           color: Colors.grey[200],
                           border: Border.all(color: Colors.grey, width: 0.3),
                         ),
-                        child: model.result == null
-                            ? Column(
+                        child: StreamBuilder(
+                          stream: model.stream,
+                          builder: (context, snapshot) {
+                            if (snapshot.data == null) {
+                              return Column(
                                 children: [
                                   Container(
                                     height: 20,
@@ -68,52 +71,58 @@ class Home extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-                              )
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: model.result.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return InkWell(
-                                    onLongPress: () {
-                                      // todo
-                                    },
-                                    child: Container(
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 3,
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  flex: 1,
-                                                  child: Container(
-                                                    height: 45,
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white,
-                                                      border: Border.all(
-                                                        color: Colors.lightBlue,
-                                                        width: 1,
-                                                      ),
+                              );
+                            }
+
+                            if (snapshot.data == 'waiting') {
+                              return Text('waiting');
+                            }
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: model.result.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return InkWell(
+                                  onLongPress: () {
+                                    // todo
+                                  },
+                                  child: Container(
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 3,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 1,
+                                                child: Container(
+                                                  height: 45,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    border: Border.all(
+                                                      color: Colors.lightBlue,
+                                                      width: 1,
                                                     ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        'aaaaa',
-                                                        //model
-                                                        //.result[index]
-                                                        //.toString(),
-                                                      ),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      model.result[index]
+                                                          .toString(),
                                                     ),
                                                   ),
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),

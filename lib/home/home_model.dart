@@ -7,8 +7,23 @@ import 'package:universal_html/driver.dart' as driver;
 class HomeModel extends ChangeNotifier {
   List result;
   TextEditingController searchWordController = TextEditingController();
+  StreamController streamController;
+  Stream stream;
+  StreamSink sink;
 
-  void scrape() async {
+  scrape() async* {
+    streamController = StreamController();
+    stream = streamController.stream;
+    sink = streamController.sink;
+
+    if (searchWordController.text == '') {
+      streamController.add(null);
+      //yield
+      return;
+    }
+
+    streamController.add('waiting');
+
     result = [];
     String searchWord = searchWordController.text;
 
@@ -37,6 +52,8 @@ class HomeModel extends ChangeNotifier {
     //streamController.sink.add(result);
 
     // 画面を更新
-    notifyListeners();
+    //notifyListeners();
+
+    streamController.add(result);
   }
 }
