@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scrape/homepage.dart';
+import 'footer/footer.dart';
 
 void main() {
   runApp(MyApp());
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         ),
         //body: Home(),
         body: HomePage(),
+        bottomNavigationBar: Footer(),
       ),
     );
   }

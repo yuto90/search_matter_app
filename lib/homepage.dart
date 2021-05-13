@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:universal_html/driver.dart' as driver;
+import 'detail/detail.dart';
 
 // todo providerを使って書き換える
 class HomePage extends StatefulWidget {
@@ -16,30 +17,54 @@ class _HomePageState extends State<HomePage> {
   List result;
 
   void search() async {
-    if (searchWordController.text == null) {
+    if (searchWordController.text == '') {
       streamController.add(null);
+      return;
     }
 
     streamController.add('waiting');
 
     result = [];
-    String searchWord = searchWordController.text;
+//    String searchWord = searchWordController.text;
+//
+//    final client = driver.HtmlDriver();
+//    final String url = "https://www.lancers.jp/work/search?keyword=$searchWord";
+//
+//    // Webページを取得
+//    await client.setDocumentFromUri(Uri.parse(url));
+//
+//    // 案件タイトルを取得
+//    final List titles =
+//        client.document.querySelectorAll('.c-media__title-inner');
+//
+//    for (final title in titles) {
+//      print(title.text.replaceAll(RegExp(r'\s'), ''));
+//      result.add(title.text.replaceAll(RegExp(r'\s'), ''));
+//    }
+//
+//    streamController.add(result);
 
-    final client = driver.HtmlDriver();
-    final String url = "https://www.lancers.jp/work/search?keyword=$searchWord";
+    await Future.delayed(Duration(seconds: 1));
+    final titles = [
+      'aaaaa',
+      'bbbbb',
+      'ccccc',
+      'ddddd',
+      'eeeee',
+      'fffff',
+      'ggggg',
+      'aaaaa',
+      'bbbbb',
+      'ccccc',
+      'ddddd',
+      'eeeee',
+      'fffff',
+      'ggggg',
+    ];
 
-    // Webページを取得
-    await client.setDocumentFromUri(Uri.parse(url));
-
-    // 案件タイトルを取得
-    final List titles =
-        client.document.querySelectorAll('.c-media__title-inner');
-
-    for (final title in titles) {
-      print(title.text.replaceAll(RegExp(r'\s'), ''));
-      result.add(title.text.replaceAll(RegExp(r'\s'), ''));
-    }
-
+    titles.forEach((title) {
+      result.add(title);
+    });
     streamController.add(result);
   }
 
@@ -74,59 +99,69 @@ class _HomePageState extends State<HomePage> {
           stream: stream,
           builder: (context, snapshot) {
             if (snapshot.data == null) {
-              return Text('null');
-            }
-
-            if (snapshot.data == 'waiting') {
-              return Center(
-                child: CircularProgressIndicator(),
+              return Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    border: Border.all(color: Colors.grey, width: 0.3),
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    size: 100,
+                    color: Colors.lightBlue,
+                  ),
+                ),
               );
             }
 
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: snapshot.data.length,
-              itemBuilder: (BuildContext context, int index) {
-                return InkWell(
-                  onLongPress: () {
-                    // todo
-                  },
-                  child: Container(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  height: 45,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(
-                                      color: Colors.lightBlue,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      snapshot.data[index].toString(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+            if (snapshot.data == 'waiting') {
+              return Expanded(
+                child: Container(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              );
+            }
+
+            return Expanded(
+              child: Container(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: snapshot.data.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: FlatButton(
+                        padding: EdgeInsets.all(10.0),
+                        textColor: Colors.black,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Detail(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          snapshot.data[index].toString(),
+                          textScaleFactor: 1.0,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                      ),
+                    );
+                  },
+                ),
+              ),
             );
           },
-        )
+        ),
       ],
     );
   }
