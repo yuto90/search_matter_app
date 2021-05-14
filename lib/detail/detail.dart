@@ -19,7 +19,7 @@ class Detail extends StatelessWidget {
               backgroundColor: Colors.white,
               brightness: Brightness.light, // ステータスバー白黒反転
               title: Text(
-                Provider.of<String>(context),
+                Provider.of<Map>(context)['title'],
                 style: TextStyle(
                   color: Colors.lightBlue,
                   fontSize: 20,
@@ -27,7 +27,9 @@ class Detail extends StatelessWidget {
                 ),
               ),
             ),
-            body: Container(),
+            body: Container(
+              child: Text(Provider.of<Map>(context)['link']),
+            ),
           );
         },
       ),

@@ -27,8 +27,9 @@ class _HomePageState extends State<HomePage> {
     streamController.add('waiting');
 
     result = [];
-//    String searchWord = searchWordController.text;
-//
+    String searchWord = searchWordController.text;
+
+    // ! スクレイピング ----------------------------------------------------------------
 //    final client = driver.HtmlDriver();
 //    final String url = "https://www.lancers.jp/work/search?keyword=$searchWord";
 //
@@ -39,34 +40,28 @@ class _HomePageState extends State<HomePage> {
 //    final List titles =
 //        client.document.querySelectorAll('.c-media__title-inner');
 //
-//    for (final title in titles) {
-//      print(title.text.replaceAll(RegExp(r'\s'), ''));
-//      result.add(title.text.replaceAll(RegExp(r'\s'), ''));
-//    }
+//    final List links = client.document.querySelectorAll('.c-media__title');
 //
+//    for (int i = 0; i < titles.length; i++) {
+//      // 案件タイトルとリンクの組み合わせリストを生成
+//      result.add({
+//        'title': titles[i].text.replaceAll(RegExp(r'\s'), ''),
+//        'link': links[i].getAttribute("href")
+//      });
+//    }
+//    print(result);
 //    streamController.add(result);
 
+    // * テストデータ ---------------------------------------------------------
     await Future.delayed(Duration(seconds: 1));
-    final titles = [
-      'aaaaa',
-      'bbbbb',
-      'ccccc',
-      'ddddd',
-      'eeeee',
-      'fffff',
-      'ggggg',
-      'aaaaa',
-      'bbbbb',
-      'ccccc',
-      'ddddd',
-      'eeeee',
-      'fffff',
-      'ggggg',
+    result = [
+      {'title': 'テストタイトル1', 'link': '/work/detail/3473226'},
+      {'title': 'テストタイトル2', 'link': '/work/detail/3052029'},
+      {'title': 'テストタイトル3', 'link': '/work/detail/3074955'},
+      {'title': 'テストタイトル4', 'link': '/work/detail/3490428'},
+      {'title': 'テストタイトル5', 'link': '/work/detail/3375993'},
+      {'title': 'テストタイトル6', 'link': '/work/detail/3183881'},
     ];
-
-    titles.forEach((title) {
-      result.add(title);
-    });
     streamController.add(result);
   }
 
@@ -144,20 +139,20 @@ class _HomePageState extends State<HomePage> {
                             child: FlatButton(
                               padding: EdgeInsets.all(10.0),
                               textColor: Colors.black,
+                              // 画面遷移
                               onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        Provider<String>.value(
-                                      value: snapshot.data[index].toString(),
+                                    builder: (context) => Provider<Map>.value(
+                                      value: snapshot.data[index],
                                       child: Detail(),
                                     ),
                                   ),
                                 );
                               },
                               child: Text(
-                                snapshot.data[index].toString(),
+                                snapshot.data[index]['title'],
                                 textScaleFactor: 1.0,
                                 style: TextStyle(
                                   fontSize: 15,
