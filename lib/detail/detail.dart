@@ -19,7 +19,7 @@ class Detail extends StatelessWidget {
               backgroundColor: Colors.white,
               brightness: Brightness.light, // ステータスバー白黒反転
               title: Text(
-                'scraping app',
+                Provider.of<String>(context),
                 style: TextStyle(
                   color: Colors.lightBlue,
                   fontSize: 20,
