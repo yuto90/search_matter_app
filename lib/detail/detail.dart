@@ -6,6 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 class Detail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final title = Provider.of<Map>(context)['title'];
+    final link = Provider.of<Map>(context)['link'];
+
     return ChangeNotifierProvider<DetailModel>(
       create: (_) => DetailModel(),
       child: Consumer<DetailModel>(
@@ -20,7 +23,7 @@ class Detail extends StatelessWidget {
               backgroundColor: Colors.white,
               brightness: Brightness.light, // ステータスバー白黒反転
               title: Text(
-                Provider.of<Map>(context)['title'],
+                title,
                 style: TextStyle(
                   color: Colors.lightBlue,
                   fontSize: 20,
@@ -32,12 +35,10 @@ class Detail extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'https://www.lancers.jp' +
-                        Provider.of<Map>(context)['link'],
+                    'https://www.lancers.jp' + link,
                   ),
                   FutureBuilder(
-                    future:
-                        model.scrapeDetail(Provider.of<Map>(context)['link']),
+                    future: model.scrapeDetail(link),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return Text(snapshot.data);
@@ -54,8 +55,8 @@ class Detail extends StatelessWidget {
                   ),
                   FlatButton(
                     child: Text('ブラウザで開く'),
-                    onPressed: () {
-                      // todo
+                    onPressed: () async {
+                      model.launchInBrowser(link);
                     },
                   ),
                 ],
