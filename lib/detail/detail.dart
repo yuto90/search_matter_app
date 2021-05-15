@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scrape/detail/detail_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Detail extends StatelessWidget {
   @override
@@ -28,7 +29,37 @@ class Detail extends StatelessWidget {
               ),
             ),
             body: Container(
-              child: Text(Provider.of<Map>(context)['link']),
+              child: Column(
+                children: [
+                  Text(
+                    'https://www.lancers.jp' +
+                        Provider.of<Map>(context)['link'],
+                  ),
+                  FutureBuilder(
+                    future:
+                        model.scrapeDetail(Provider.of<Map>(context)['link']),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text(snapshot.data);
+                      } else {
+                        return Expanded(
+                          child: Container(
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  FlatButton(
+                    child: Text('ブラウザで開く'),
+                    onPressed: () {
+                      // todo
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },
