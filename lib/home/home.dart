@@ -5,6 +5,7 @@ import 'package:scrape/home/home_model.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:universal_html/driver.dart' as driver;
 import '../detail/detail.dart';
+import 'package:intl/intl.dart';
 
 // todo providerを使って書き換える
 class HomePage extends StatefulWidget {
@@ -17,6 +18,14 @@ class _HomePageState extends State<HomePage> {
   StreamController streamController;
   Stream stream;
   List result;
+
+  String getTodayDate() {
+    // todo
+    return DateFormat.MMMMd('ja').format(DateTime.now()).toString() +
+        ' ' +
+        DateFormat('hh:mm').format(DateTime.now()).toString();
+    //return DateFormat('hh:mm').format(DateTime.now()).toString();
+  }
 
   void search() async {
     if (searchWordController.text == '') {
@@ -50,7 +59,7 @@ class _HomePageState extends State<HomePage> {
       final link = itemLists[i].querySelector('.c-media__title');
       // 案件単価を取得
       final price = itemLists[i].querySelector('.c-media__job-price');
-      // todo 提案数
+      // 提案数
       final propose = itemLists[i].querySelector('div > .c-media__job-propose');
 
       result.add({
@@ -101,20 +110,45 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TextFormField(
-          keyboardType: TextInputType.text,
-          controller: searchWordController,
-          decoration: InputDecoration(
-            hintText: 'input search word',
-            icon: Icon(Icons.add_circle_outline),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: TextFormField(
+                  keyboardType: TextInputType.text,
+                  controller: searchWordController,
+                  decoration: InputDecoration(
+                    hintText: 'input search word',
+                    icon: Icon(Icons.search),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                  child: FlatButton(
+                    onPressed: () {
+                      search();
+                    },
+                    child: Text('検索'),
+                    color: Colors.lightBlue,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        FlatButton(
-          onPressed: () {
-            search();
-          },
-          child: Text('検索'),
-          color: Colors.lightBlue,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('最終更新:\n' + getTodayDate()),
+            ),
+          ],
         ),
         StreamBuilder(
           stream: stream,
