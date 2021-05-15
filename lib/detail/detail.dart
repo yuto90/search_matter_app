@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scrape/detail/detail_model.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Detail extends StatelessWidget {
   @override
@@ -23,7 +22,7 @@ class Detail extends StatelessWidget {
               backgroundColor: Colors.white,
               brightness: Brightness.light, // ステータスバー白黒反転
               title: Text(
-                title,
+                '詳細情報',
                 style: TextStyle(
                   color: Colors.lightBlue,
                   fontSize: 20,
@@ -34,14 +33,15 @@ class Detail extends StatelessWidget {
             body: Container(
               child: Column(
                 children: [
-                  Text(
-                    'https://www.lancers.jp' + link,
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    child: Text(title),
                   ),
                   FutureBuilder(
                     future: model.scrapeDetail(link),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        return Text(snapshot.data);
+                        return Text(snapshot.data.toString());
                       } else {
                         return Expanded(
                           child: Container(

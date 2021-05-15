@@ -6,19 +6,27 @@ import 'package:url_launcher/url_launcher.dart';
 class DetailModel extends ChangeNotifier {
   final client = driver.HtmlDriver();
 
+  // 案件詳細情報を抜き出す
   Future scrapeDetail(String link) async {
-    String url = 'https://www.lancers.jp' + link;
+    String url = 'https://www.lancers.jp$link';
     // Webページを取得
-    await client.setDocumentFromUri(Uri.parse(url));
-
-    final title = client.document.title;
-    print(title);
-    return title;
+    //price-block workprice__text--high
+//    await client.setDocumentFromUri(Uri.parse(url));
+//
+//    var highPrice = client.document.querySelectorAll('.worksummary__text');
+//    highPrice.forEach((element) {
+//      print(element);
+//    });
+//    print(highPrice.length);
+//    //print(highPrice);
+//
+//    return highPrice;
+    return 'future';
   }
 
   // ブラウザで開く
   Future launchInBrowser(link) async {
-    final url = 'https://www.lancers.jp' + link;
+    final url = 'https://www.lancers.jp$link';
     if (await canLaunch(url)) {
       await launch(
         url,

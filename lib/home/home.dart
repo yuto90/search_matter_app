@@ -30,39 +30,41 @@ class _HomePageState extends State<HomePage> {
     String searchWord = searchWordController.text;
 
     // ! スクレイピング ----------------------------------------------------------------
-//    final client = driver.HtmlDriver();
-//    final String url = "https://www.lancers.jp/work/search?keyword=$searchWord";
-//
-//    // Webページを取得
-//    await client.setDocumentFromUri(Uri.parse(url));
-//
-//    // 案件タイトルを取得
-//    final List titles =
-//        client.document.querySelectorAll('.c-media__title-inner');
-//
-//    final List links = client.document.querySelectorAll('.c-media__title');
-//
-//    for (int i = 0; i < titles.length; i++) {
-//      // 案件タイトルとリンクの組み合わせリストを生成
-//      result.add({
-//        'title': titles[i].text.replaceAll(RegExp(r'\s'), ''),
-//        'link': links[i].getAttribute("href")
-//      });
-//    }
-//    print(result);
-//    streamController.add(result);
+    final client = driver.HtmlDriver();
+
+    final url =
+        'https://www.lancers.jp/work/search?keyword=$searchWord&show_description=0&sort=started&work_rank%5B%5D=0&work_rank%5B%5D=1&work_rank%5B%5D=2&work_rank%5B%5D=3';
+
+    // Webページを取得
+    await client.setDocumentFromUri(Uri.parse(url));
+
+    // 案件タイトルを取得
+    final List titles =
+        client.document.querySelectorAll('.c-media__title-inner');
+
+    final List links = client.document.querySelectorAll('.c-media__title');
+
+    for (int i = 0; i < titles.length; i++) {
+      // 案件タイトルとリンクの組み合わせリストを生成
+      result.add({
+        'title': titles[i].text.replaceAll(RegExp(r'\s'), ''),
+        'link': links[i].getAttribute("href")
+      });
+    }
+    print(result);
+    streamController.add(result);
 
     // * テストデータ ---------------------------------------------------------
-    await Future.delayed(Duration(seconds: 1));
-    result = [
-      {'title': 'テストタイトル1', 'link': '/work/detail/3473226'},
-      {'title': 'テストタイトル2', 'link': '/work/detail/3052029'},
-      {'title': 'テストタイトル3', 'link': '/work/detail/3074955'},
-      {'title': 'テストタイトル4', 'link': '/work/detail/3490428'},
-      {'title': 'テストタイトル5', 'link': '/work/detail/3375993'},
-      {'title': 'テストタイトル6', 'link': '/work/detail/3183881'},
-    ];
-    streamController.add(result);
+//    await Future.delayed(Duration(seconds: 1));
+//    result = [
+//      {'title': 'テストタイトル1', 'link': '/work/detail/3473226'},
+//      {'title': 'テストタイトル2', 'link': '/work/detail/3052029'},
+//      {'title': 'テストタイトル3', 'link': '/work/detail/3074955'},
+//      {'title': 'テストタイトル4', 'link': '/work/detail/3490428'},
+//      {'title': 'テストタイトル5', 'link': '/work/detail/3375993'},
+//      {'title': 'テストタイトル6', 'link': '/work/detail/3183881'},
+//    ];
+//    streamController.add(result);
   }
 
   @override
@@ -132,34 +134,22 @@ class _HomePageState extends State<HomePage> {
                         shrinkWrap: true,
                         itemCount: snapshot.data.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                            ),
-                            child: FlatButton(
-                              padding: EdgeInsets.all(10.0),
-                              textColor: Colors.black,
-                              // 画面遷移
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Provider<Map>.value(
-                                      value: snapshot.data[index],
-                                      child: Detail(),
-                                    ),
+                          return ListTile(
+                            title: Text(snapshot.data[index]['title']),
+                            subtitle: Text('サブタイトル'),
+                            leading: Text('5000円'),
+                            trailing: Text('提案数：1'),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Provider<Map>.value(
+                                    value: snapshot.data[index],
+                                    child: Detail(),
                                   ),
-                                );
-                              },
-                              child: Text(
-                                snapshot.data[index]['title'],
-                                textScaleFactor: 1.0,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                            ),
+                              );
+                            },
                           );
                         },
                       ),
