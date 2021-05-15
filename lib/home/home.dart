@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
       streamController.add(null);
       return;
     }
-
+    // ローディング画面を表示
     streamController.add('waiting');
 
     result = [];
@@ -38,31 +38,53 @@ class _HomePageState extends State<HomePage> {
     // Webページを取得
     await client.setDocumentFromUri(Uri.parse(url));
 
-    // 案件タイトルを取得
-    final List titles =
-        client.document.querySelectorAll('.c-media__title-inner');
+    // 案件リストを格納
+    final itemLists =
+        client.document.querySelectorAll('div > .c-media-list__item');
 
-    final List links = client.document.querySelectorAll('.c-media__title');
+    // 1件づつ抽出してリストに格納
+    for (int i = 0; i < 30; i++) {
+      // 案件タイトルを取得
+      final title = itemLists[i].querySelector('.c-media__title-inner');
+      // 案件リンクを取得
+      final link = itemLists[i].querySelector('.c-media__title');
+      // 案件単価を取得
+      final price = itemLists[i].querySelector('.c-media__job-price');
+      // todo 提案数
+      final propose = itemLists[i].querySelector('div > .c-media__job-propose');
 
-    for (int i = 0; i < titles.length; i++) {
-      // 案件タイトルとリンクの組み合わせリストを生成
       result.add({
-        'title': titles[i].text.replaceAll(RegExp(r'\s'), ''),
-        'link': links[i].getAttribute("href")
+        'title': title.text.replaceAll(RegExp(r'\s'), ''),
+        'link': link.getAttribute("href"),
+        'price': price.text.replaceAll(RegExp(r'\s'), ''),
+        'propose': propose == null
+            ? 'null'
+            : propose.text.replaceAll(RegExp(r'\s'), '')
       });
     }
-    print(result);
     streamController.add(result);
 
     // * テストデータ ---------------------------------------------------------
 //    await Future.delayed(Duration(seconds: 1));
 //    result = [
-//      {'title': 'テストタイトル1', 'link': '/work/detail/3473226'},
-//      {'title': 'テストタイトル2', 'link': '/work/detail/3052029'},
-//      {'title': 'テストタイトル3', 'link': '/work/detail/3074955'},
-//      {'title': 'テストタイトル4', 'link': '/work/detail/3490428'},
-//      {'title': 'テストタイトル5', 'link': '/work/detail/3375993'},
-//      {'title': 'テストタイトル6', 'link': '/work/detail/3183881'},
+//      {
+//        'title': 'テストタイトル1',
+//        'link': '/work/detail/3473226',
+//        'price': '10001',
+//        'propose': '提案数30'
+//      },
+//      {
+//        'title': 'テストタイトル2',
+//        'link': '/work/detail/3052029',
+//        'price': '10001',
+//        'propose': '提案数30'
+//      },
+//      {
+//        'title': 'テストタイトル3',
+//        'link': '/work/detail/3074955',
+//        'price': '10001',
+//        'propose': '提案数30'
+//      },
 //    ];
 //    streamController.add(result);
   }
@@ -130,15 +152,22 @@ class _HomePageState extends State<HomePage> {
                 builder: (context, model, child) {
                   return Expanded(
                     child: Container(
-                      child: ListView.builder(
+                      child: ListView.separated(
+                        separatorBuilder: (context, index) => Divider(
+                          color: Colors.black,
+                          height: 1,
+                        ),
                         shrinkWrap: true,
                         itemCount: snapshot.data.length,
                         itemBuilder: (BuildContext context, int index) {
                           return ListTile(
                             title: Text(snapshot.data[index]['title']),
-                            subtitle: Text('サブタイトル'),
-                            leading: Text('5000円'),
-                            trailing: Text('提案数：1'),
+                            subtitle: Text(
+                              snapshot.data[index]['price'],
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            leading: Text('aaa'),
+                            trailing: Text(snapshot.data[index]['propose']),
                             onTap: () {
                               Navigator.push(
                                 context,
