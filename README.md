@@ -1,6 +1,7 @@
 # scrape
 
-A new Flutter project.
+スクレイピング練習用アプリ
+クラウドソーシング案件取得
 
 ## Getting Started
 
