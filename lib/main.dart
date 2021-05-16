@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         ),
         //body: Home(),
         body: HomePage(),
-        bottomNavigationBar: Footer(),
+        //bottomNavigationBar: Footer(),
       ),
     );
   }
