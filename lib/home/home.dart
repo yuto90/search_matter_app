@@ -6,6 +6,7 @@ import 'package:universal_html/html.dart' as html;
 import 'package:universal_html/driver.dart' as driver;
 import '../detail/detail.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 // todo providerを使って書き換える
 class HomePage extends StatefulWidget {
@@ -15,25 +16,28 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   TextEditingController searchWordController = TextEditingController();
-  StreamController streamController;
-  Stream stream;
-  List result;
 
-  String getTodayDate() {
-    // todo
-    return DateFormat.MMMMd('ja').format(DateTime.now()).toString() +
-        ' ' +
-        DateFormat('hh:mm').format(DateTime.now()).toString();
-    //return DateFormat('hh:mm').format(DateTime.now()).toString();
-  }
+  // 案件リスト用
+  StreamController listStreamController;
+  Stream listStream;
+
+  // 最終更新用
+  StreamController updateStreamController;
+  Stream updateStream;
+
+  // スクレイピング結果格納用
+  List<Map<String, String>> result;
 
   void search() async {
     if (searchWordController.text == '') {
-      streamController.add(null);
+      listStreamController.add(null);
+      updateStreamController.add(null);
       return;
     }
+
     // ローディング画面を表示
-    streamController.add('waiting');
+    listStreamController.add('waiting');
+    updateStreamController.add('waiting');
 
     result = [];
     String searchWord = searchWordController.text;
@@ -71,7 +75,8 @@ class _HomePageState extends State<HomePage> {
             : propose.text.replaceAll(RegExp(r'\s'), '')
       });
     }
-    streamController.add(result);
+
+    listStreamController.add(result);
 
     // * テストデータ ---------------------------------------------------------
 //    await Future.delayed(Duration(seconds: 1));
@@ -95,15 +100,25 @@ class _HomePageState extends State<HomePage> {
 //        'propose': '提案数30'
 //      },
 //    ];
-//    streamController.add(result);
+//    listStreamController.add(result);
+
+    // 最終更新表示用
+    initializeDateFormatting('ja');
+    updateStreamController.add(
+      DateFormat.MMMMd('ja').format(DateTime.now()).toString() +
+          ' ' +
+          DateFormat('hh:mm').format(DateTime.now()).toString(),
+    );
   }
 
   @override
   void initState() {
     super.initState();
 
-    streamController = StreamController();
-    stream = streamController.stream;
+    listStreamController = StreamController();
+    listStream = listStreamController.stream;
+    updateStreamController = StreamController();
+    updateStream = updateStreamController.stream;
   }
 
   @override
@@ -144,14 +159,34 @@ class _HomePageState extends State<HomePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            // 最終更新
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text('最終更新:\n' + getTodayDate()),
+              //child: Text('最終更新:\n' + getTodayDate()),
+              child: StreamBuilder(
+                stream: updateStream,
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return Text('最終更新:\n' + '-----');
+                  }
+
+                  if (snapshot.data == 'waiting') {
+                    return Container(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  return Text('最終更新:\n' + snapshot.data);
+                },
+              ),
             ),
           ],
         ),
+        // 案件リスト
         StreamBuilder(
-          stream: stream,
+          stream: listStream,
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return Expanded(
