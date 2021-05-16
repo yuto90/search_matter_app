@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:scrape/home/home.dart';
+import 'package:scrape/home.dart';
 import 'footer/footer.dart';
 
 void main() {

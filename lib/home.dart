@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:scrape/home/home_model.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:universal_html/driver.dart' as driver;
-import '../detail/detail.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // todo providerを使って書き換える
 class HomePage extends StatefulWidget {
@@ -214,46 +212,40 @@ class _HomePageState extends State<HomePage> {
                 ),
               );
             }
-
-            return ChangeNotifierProvider<HomeModel>(
-              create: (_) => HomeModel(),
-              child: Consumer<HomeModel>(
-                builder: (context, model, child) {
-                  return Expanded(
-                    child: Container(
-                      child: ListView.separated(
-                        separatorBuilder: (context, index) => Divider(
-                          color: Colors.black,
-                          height: 1,
-                        ),
-                        shrinkWrap: true,
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return ListTile(
-                            title: Text(snapshot.data[index]['title']),
-                            subtitle: Text(
-                              snapshot.data[index]['price'],
-                              style: TextStyle(color: Colors.red),
-                            ),
-                            leading: Text('aaa'),
-                            trailing: Text(snapshot.data[index]['propose']),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Provider<Map>.value(
-                                    value: snapshot.data[index],
-                                    child: Detail(),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
+            return Expanded(
+              child: Container(
+                child: ListView.separated(
+                  separatorBuilder: (context, index) => Divider(
+                    color: Colors.black,
+                    height: 1,
+                  ),
+                  shrinkWrap: true,
+                  itemCount: snapshot.data.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      title: Text(snapshot.data[index]['title']),
+                      subtitle: Text(
+                        snapshot.data[index]['price'],
+                        style: TextStyle(color: Colors.red),
                       ),
-                    ),
-                  );
-                },
+                      leading: Text('aaa'),
+                      trailing: Text(snapshot.data[index]['propose']),
+                      onTap: () async {
+                        final url = 'https://www.lancers.jp' +
+                            snapshot.data[index]['link'];
+                        if (await canLaunch(url)) {
+                          await launch(
+                            url,
+                            forceSafariVC: false,
+                            forceWebView: false,
+                          );
+                        } else {
+                          throw 'このURLにはアクセスできません';
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
             );
           },
