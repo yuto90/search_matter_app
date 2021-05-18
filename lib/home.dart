@@ -1,18 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:universal_html/html.dart' as html;
 import 'package:universal_html/driver.dart' as driver;
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
-// todo providerを使って書き換える
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  // 検索ボックス用
   TextEditingController searchWordController = TextEditingController();
 
   // 案件リスト用
@@ -26,6 +25,10 @@ class _HomePageState extends State<HomePage> {
   // スクレイピング結果格納用
   List<Map<String, String>> result;
 
+  // 最終更新表示用
+  DateTime now = DateTime.now();
+
+  // 案件を検索する
   void search() async {
     if (searchWordController.text == '') {
       listStreamController.add(null);
@@ -38,22 +41,19 @@ class _HomePageState extends State<HomePage> {
     updateStreamController.add('waiting');
 
     result = [];
+    // 検索ボックスに入力したワードを代入
     String searchWord = searchWordController.text;
 
-    // ! スクレイピング ----------------------------------------------------------------
     final client = driver.HtmlDriver();
-
+    // ランサーズの新着順ソートURL
     final url =
         'https://www.lancers.jp/work/search?keyword=$searchWord&show_description=0&sort=started&work_rank%5B%5D=0&work_rank%5B%5D=1&work_rank%5B%5D=2&work_rank%5B%5D=3';
-
     // Webページを取得
     await client.setDocumentFromUri(Uri.parse(url));
+    // 単体の案件リストを格納
+    final itemLists = client.document.querySelectorAll('.c-media-list__item');
 
-    // 案件リストを格納
-    final itemLists =
-        client.document.querySelectorAll('div > .c-media-list__item');
-
-    // 1件づつ抽出してリストに格納
+    // アプリに表示したい情報を抽出してリストに格納
     for (int i = 0; i < 30; i++) {
       // 案件タイトルを取得
       final title = itemLists[i].querySelector('.c-media__title-inner');
@@ -63,49 +63,31 @@ class _HomePageState extends State<HomePage> {
       final price = itemLists[i].querySelector('.c-media__job-price');
       // 提案数
       final propose = itemLists[i].querySelector('div > .c-media__job-propose');
+      // 応募期間
+      final limit = itemLists[i].querySelector('.c-media__job-time__remaining');
 
+      // 案件1件毎のタイトル、リンク、単価、提案数、応募期間を配列に格納
       result.add({
         'title': title.text.replaceAll(RegExp(r'\s'), ''),
         'link': link.getAttribute("href"),
         'price': price.text.replaceAll(RegExp(r'\s'), ''),
         'propose': propose == null
             ? 'null'
-            : propose.text.replaceAll(RegExp(r'\s'), '')
+            : propose.text.replaceAll(RegExp(r'\s'), ''),
+        'limit':
+            limit == null ? 'null' : limit.text.replaceAll(RegExp(r'\s'), ''),
       });
     }
 
+    // streamに結果を流す
     listStreamController.add(result);
-
-    // * テストデータ ---------------------------------------------------------
-//    await Future.delayed(Duration(seconds: 1));
-//    result = [
-//      {
-//        'title': 'テストタイトル1',
-//        'link': '/work/detail/3473226',
-//        'price': '10001',
-//        'propose': '提案数30'
-//      },
-//      {
-//        'title': 'テストタイトル2',
-//        'link': '/work/detail/3052029',
-//        'price': '10001',
-//        'propose': '提案数30'
-//      },
-//      {
-//        'title': 'テストタイトル3',
-//        'link': '/work/detail/3074955',
-//        'price': '10001',
-//        'propose': '提案数30'
-//      },
-//    ];
-//    listStreamController.add(result);
 
     // 最終更新表示用
     initializeDateFormatting('ja');
     updateStreamController.add(
-      DateFormat.MMMMd('ja').format(DateTime.now()).toString() +
+      DateFormat.MMMMd('ja').format(now).toString() +
           ' ' +
-          DateFormat('hh:mm').format(DateTime.now()).toString(),
+          DateFormat.Hm().format(now).toString(),
     );
   }
 
@@ -113,6 +95,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
+    // widget生成時にstream系を初期化
     listStreamController = StreamController();
     listStream = listStreamController.stream;
     updateStreamController = StreamController();
@@ -182,7 +165,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        // 案件リスト
+        // 案件表示エリア
         StreamBuilder(
           stream: listStream,
           builder: (context, snapshot) {
@@ -194,11 +177,7 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.grey[200],
                     border: Border.all(color: Colors.grey, width: 0.3),
                   ),
-                  child: Icon(
-                    Icons.add,
-                    size: 100,
-                    color: Colors.lightBlue,
-                  ),
+                  child: Center(child: Text('検索したいワードを入力してね')),
                 ),
               );
             }
@@ -213,39 +192,49 @@ class _HomePageState extends State<HomePage> {
               );
             }
             return Expanded(
-              child: Container(
-                child: ListView.separated(
-                  separatorBuilder: (context, index) => Divider(
-                    color: Colors.black,
-                    height: 1,
-                  ),
-                  shrinkWrap: true,
-                  itemCount: snapshot.data.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      title: Text(snapshot.data[index]['title']),
-                      subtitle: Text(
-                        snapshot.data[index]['price'],
-                        style: TextStyle(color: Colors.red),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  // 募集期間が設定されている（募集終了していなければ画面に表示する）
+                  if (snapshot.data[index]['limit'] != 'null') {
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: Colors.black,
+                            width: 1,
+                          ),
+                        ),
                       ),
-                      leading: Text('aaa'),
-                      trailing: Text(snapshot.data[index]['propose']),
-                      onTap: () async {
-                        final url = 'https://www.lancers.jp' +
-                            snapshot.data[index]['link'];
-                        if (await canLaunch(url)) {
-                          await launch(
-                            url,
-                            forceSafariVC: false,
-                            forceWebView: false,
-                          );
-                        } else {
-                          throw 'このURLにはアクセスできません';
-                        }
-                      },
+                      child: ListTile(
+                        title: Text(snapshot.data[index]['title']),
+                        subtitle: Text(
+                          snapshot.data[index]['price'],
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        leading: Text(snapshot.data[index]['propose']),
+                        trailing: Text(snapshot.data[index]['limit']),
+                        onTap: () async {
+                          // 外部ブラウザで案件詳細画面を表示
+                          final url = 'https://www.lancers.jp' +
+                              snapshot.data[index]['link'];
+                          if (await canLaunch(url)) {
+                            await launch(
+                              url,
+                              forceSafariVC: false,
+                              forceWebView: false,
+                            );
+                          } else {
+                            throw 'ページが開けませんでした';
+                          }
+                        },
+                      ),
                     );
-                  },
-                ),
+                  } else {
+                    return Container();
+                  }
+                },
               ),
             );
           },

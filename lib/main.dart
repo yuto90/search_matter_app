@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:scrape/home.dart';
-import 'footer/footer.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,8 +18,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          elevation: 0.0, // 影を非表示
-          leading: Container(), // 戻るボタンを非表示
+          elevation: 0.0,
           iconTheme: IconThemeData(
             color: Colors.orange,
           ),
@@ -35,9 +33,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        //body: Home(),
         body: HomePage(),
-        //bottomNavigationBar: Footer(),
       ),
     );
   }
