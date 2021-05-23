@@ -25,9 +25,6 @@ class _HomePageState extends State<HomePage> {
   // スクレイピング結果格納用
   List<Map<String, String>> result;
 
-  // 最終更新表示用
-  DateTime now = DateTime.now();
-
   String url;
 
   // 案件を検索する
@@ -93,6 +90,9 @@ class _HomePageState extends State<HomePage> {
     listStreamController.add(result);
 
     // 最終更新表示用
+    DateTime now = DateTime.now();
+
+    // 最終更新表示用
     initializeDateFormatting('ja');
     updateStreamController.add(
       DateFormat.MMMMd('ja').format(now).toString() +
@@ -116,6 +116,28 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          //child: Text('最終更新:\n' + getTodayDate()),
+          child: StreamBuilder(
+            stream: updateStream,
+            builder: (context, snapshot) {
+              if (snapshot.data == null) {
+                return Text('最終更新:\n' + '-----');
+              }
+
+              if (snapshot.data == 'waiting') {
+                return Container(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              return Text('最終更新:\n' + snapshot.data);
+            },
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -147,43 +169,26 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            RaisedButton(
-              child: Text('データ収集'),
-              color: Colors.white,
-              shape: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-              ),
-              onPressed: () {
-                search('data');
-              },
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal, // スクロールの向きを水平方向に指定
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                RaisedButton(
+                  child: Text('データ収集'),
+                  color: Colors.white,
+                  shape: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                  onPressed: () {
+                    search('data');
+                  },
+                ),
+              ],
             ),
-            // 最終更新
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              //child: Text('最終更新:\n' + getTodayDate()),
-              child: StreamBuilder(
-                stream: updateStream,
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) {
-                    return Text('最終更新:\n' + '-----');
-                  }
-
-                  if (snapshot.data == 'waiting') {
-                    return Container(
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-
-                  return Text('最終更新:\n' + snapshot.data);
-                },
-              ),
-            ),
-          ],
+          ),
         ),
         // 案件表示エリア
         StreamBuilder(
@@ -198,6 +203,19 @@ class _HomePageState extends State<HomePage> {
                     border: Border.all(color: Colors.grey, width: 0.3),
                   ),
                   child: Center(child: Text('検索したいワードを入力してね')),
+                ),
+              );
+            }
+
+            if (snapshot.data.length == 0) {
+              return Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    border: Border.all(color: Colors.grey, width: 0.3),
+                  ),
+                  child: Center(child: Text('検索結果なし')),
                 ),
               );
             }
