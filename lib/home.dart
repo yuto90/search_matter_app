@@ -28,9 +28,11 @@ class _HomePageState extends State<HomePage> {
   // 最終更新表示用
   DateTime now = DateTime.now();
 
+  String url;
+
   // 案件を検索する
-  void search() async {
-    if (searchWordController.text == '') {
+  void search([tag]) async {
+    if (searchWordController.text == '' && tag == null) {
       listStreamController.add(null);
       updateStreamController.add(null);
       return;
@@ -45,16 +47,24 @@ class _HomePageState extends State<HomePage> {
     String searchWord = searchWordController.text;
 
     final client = driver.HtmlDriver();
-    // ランサーズの新着順ソートURL
-    final url =
-        'https://www.lancers.jp/work/search?keyword=$searchWord&show_description=0&sort=started&work_rank%5B%5D=0&work_rank%5B%5D=1&work_rank%5B%5D=2&work_rank%5B%5D=3';
+
+    url =
+        'https://www.lancers.jp/work/search/task/collect?type%5B%5D=project&open=1&work_rank%5B%5D=3&work_rank%5B%5D=2&work_rank%5B%5D=1&work_rank%5B%5D=0&budget_from=&budget_to=&search=%E6%A4%9C%E7%B4%A2&keyword=$searchWord&not=';
+
+    // タグを押された場合は検索ボックスの入力に関係なくurlをタグの内容に変更
+    if (tag != null) {
+      // データ収集カテゴリ, 新着, プロジェクト
+      url =
+          'https://www.lancers.jp/work/search/task/collect?type%5B%5D=project&open=1&work_rank%5B%5D=3&work_rank%5B%5D=2&work_rank%5B%5D=1&work_rank%5B%5D=0&budget_from=&budget_to=&keyword=&not=';
+    }
+
     // Webページを取得
     await client.setDocumentFromUri(Uri.parse(url));
     // 単体の案件リストを格納
     final itemLists = client.document.querySelectorAll('.c-media-list__item');
 
     // アプリに表示したい情報を抽出してリストに格納
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < itemLists.length; i++) {
       // 案件タイトルを取得
       final title = itemLists[i].querySelector('.c-media__title-inner');
       // 案件リンクを取得
@@ -140,6 +150,16 @@ class _HomePageState extends State<HomePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            RaisedButton(
+              child: Text('データ収集'),
+              color: Colors.white,
+              shape: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              onPressed: () {
+                search('data');
+              },
+            ),
             // 最終更新
             Padding(
               padding: const EdgeInsets.all(8.0),
